@@ -11,6 +11,11 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
+    "paths": {
+      "ng-telegram-webapp": [
+        "dist/ng-telegram-webapp"
+      ]
+    },
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
@@ -22,6 +27,10 @@
     "lib": [
       "ES2022",
       "dom"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@zakarliuka/tg-webapp-types"
     ]
   },
   "angularCompilerOptions": {
