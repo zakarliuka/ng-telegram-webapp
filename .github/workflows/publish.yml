@@ -22,9 +22,10 @@ jobs:
         run: npm ci
 
       - name: Build the library
-        run: npm run build && cd ./dist/ng-telegram-webapp
+        run: npm run build
 
       - name: Publish to npm
+        run: npm publish
+        working-directory: ./dist/ng-telegram-webapp
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
-        run: npm publish
