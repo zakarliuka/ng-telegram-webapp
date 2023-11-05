@@ -1,6 +1,6 @@
 # ng-telegram-webapp
 
-This Angular library provides a set of tools to create Telegram WebApps with ease. It wraps the Telegram WebApp API in a convenient Angular service, along with components and directives to streamline the development of your Telegram WebApp. For more information on Telegram Web Apps, please visit the [official documentation](https://core.telegram.org/bots/webapps).
+This Angular library provides a set of tools to create Telegram WebApps with ease. It wraps the Telegram WebApp API in a convenient Angular service to streamline the development of your Telegram WebApp. For more information on Telegram Web Apps, please visit the [official documentation](https://core.telegram.org/bots/webapps).
 
 ## Prerequisites
 
@@ -18,7 +18,6 @@ Before using this library, you need to include the Telegram WebApp JavaScript AP
 - Cloud storage utilities for Telegram data.
 - Payment invoice handling for Telegram's payment system.
 - QR code scanning functionality.
-- Angular directives for common Telegram WebApp tasks.
 
 ## Installation
 

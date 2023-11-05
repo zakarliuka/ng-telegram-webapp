@@ -1,5 +1,5 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "name": "@zakarliuka/ng-telegram-webapp",
   "description": "Telegram webapp binding for Angular See: https://core.telegram.org/bots/webapps",
   "repository": {
