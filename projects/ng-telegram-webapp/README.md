@@ -275,4 +275,4 @@ If you have any questions or encounter any issues, please feel free to [open an 
 
 ## License
 
-This library is licensed under the MIT License. See the [https://github.com/zakarliuka/ng-telegram-webapp/blob/master/LICENSE](LICENSE) file for full details.
+This library is licensed under the MIT License. See the [LICENSE](https://github.com/zakarliuka/ng-telegram-webapp/blob/master/LICENSE) file for full details.
