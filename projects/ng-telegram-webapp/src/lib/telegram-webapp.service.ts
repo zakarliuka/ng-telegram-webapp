@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { TelegramWebApp } from '@zakarliuka/tg-webapp-types';
-import { Observable, Subject, finalize } from 'rxjs';
+import { Observable } from 'rxjs';
 import { BackButton } from './back-button';
 import { CloudStorage } from './cloud-storage';
 import { HapticFeedback } from './haptic-feedback';
@@ -27,7 +27,6 @@ type ChatType = 'users' | 'bots' | 'groups' | 'channels';
   providedIn: 'root',
 })
 export class TelegramWebappService {
-  #scannerSubject: Subject<string> | null = null;
 
   readonly webApp = inject(TWA);
 
@@ -149,23 +148,12 @@ export class TelegramWebappService {
    * @returns a data depends on event type
    */
   onEvent<T extends keyof EventDataMap>(event: T): Observable<EventDataMap[T]> {
-    const subject$ = new Subject<EventDataMap[T]>();
-    const cb = (val: EventDataMap[T]) => {
-      subject$.next(val);
-    };
-
-    this.webApp.onEvent(event, cb);
     return new Observable<EventDataMap[T]>((subscriber) => {
-      const subscription = subject$
-        .asObservable()
-        .pipe(
-          finalize(() => {
-            this.webApp.offEvent(event, cb);
-          })
-        )
-        .subscribe(subscriber);
+      const cb = subscriber.next.bind(subscriber);
+      this.webApp.onEvent(event, cb);
+
       return () => {
-        subscription.unsubscribe();
+        this.webApp.offEvent(event, cb);
       };
     });
   }
@@ -200,7 +188,7 @@ export class TelegramWebappService {
 
   /**
    * Function used to send data to the bot. When this method is called, a
-   * service message is sent to the bot containing the data data of the length
+   * service message is sent to the bot containing the data of the length
    * up to 4096 bytes, and the Mini App is closed. See the field web_app_data
    * in the class Message. This method is only available for Mini Apps launched
    * via a Keyboard button.
@@ -214,23 +202,19 @@ export class TelegramWebappService {
    * Function that shows a native popup for scanning a QR code described by the params argument of the type ScanQrPopupParams.
    */
   showScanQrPopup(params: TelegramWebApp.ScanQrPopupParams = {}) {
-    if (!this.#scannerSubject) {
-      this.#scannerSubject = new Subject<string>();
+    return new Observable<string>(subscriber => {
+      this.webApp.showScanQrPopup(params, subscriber.next.bind(subscriber));
 
-      this.webApp.showScanQrPopup(params, (text: string) => {
-        this.#scannerSubject?.next(text);
-      });
-    }
-    return this.#scannerSubject;
+      return () => {
+        this.webApp.closeScanQrPopup();
+      };
+    });
   }
 
   /**
    * Function that closes the native popup for scanning a QR code opened with the showScanQrPopup method.
    */
   closeScanQrPopup() {
-    this.#scannerSubject?.complete();
-    this.#scannerSubject = null;
-
     this.webApp.closeScanQrPopup();
   }
 
@@ -252,71 +236,60 @@ export class TelegramWebappService {
    * Function that opens an invoice using the link url.
    */
   openInvoice(url: string) {
-    const subject$ = new Subject<TelegramWebApp.PaymentStatus>();
-
-    this.webApp.openInvoice(url, (status: TelegramWebApp.PaymentStatus) => {
-      subject$.next(status);
-      subject$.complete();
-    });
-
-    return subject$.asObservable();
+    return new Observable<TelegramWebApp.PaymentStatus>(subscriber => {
+      this.webApp.openInvoice(url, (status: TelegramWebApp.PaymentStatus) => {
+        subscriber.next(status);
+        subscriber.complete();
+      });
+    })
   }
 
   /**
    * Function that shows a native popup described by the params argument of the type PopupParams.
    */
   showPopup(params: TelegramWebApp.PopupParams) {
-    const subject$ = new Subject<string>();
-
-    this.webApp.showPopup(params, (buttonId: string) => {
-      subject$.next(buttonId);
-      subject$.complete();
+    return new Observable<string>(subscriber => {
+      this.webApp.showPopup(params, (buttonId: string) => {
+        subscriber.next(buttonId);
+        subscriber.complete();
+      });
     });
-
-    return subject$.asObservable();
   }
 
   /**
    * Function that shows a native popup described by the params argument of the type PopupParams.
    */
   showAlert(msg: string) {
-    const subject$ = new Subject<void>();
-
-    this.webApp.showAlert(msg, () => {
-      subject$.next();
-      subject$.complete();
+    return new Observable<void>(subscriber => {
+      this.webApp.showAlert(msg, () => {
+        subscriber.next();
+        subscriber.complete();
+      });
     });
-
-    return subject$.asObservable();
   }
 
   /**
    * Function that shows message in a simple confirmation window with 'OK' and 'Cancel' buttons.
    */
   showConfirm(msg: string) {
-    const subject$ = new Subject<boolean>();
-
-    this.webApp.showConfirm(msg, (val: boolean) => {
-      subject$.next(val);
-      subject$.complete();
+    return new Observable<boolean>(subscriber => {
+      this.webApp.showConfirm(msg, (okButtonPressed: boolean) => {
+        subscriber.next(okButtonPressed);
+        subscriber.complete();
+      });
     });
-
-    return subject$.asObservable();
   }
 
   /**
-   *
-Function that shows a native popup requesting permission for the bot to send messages to the user.
+   * Function that shows a native popup requesting permission for the bot to send messages to the user.
    */
   requestWriteAccess() {
-    const subject$ = new Subject<boolean>();
-
-    this.webApp.requestWriteAccess((val: boolean) => {
-      subject$.next(val);
-      subject$.complete();
+    return new Observable<boolean>(subscriber => {
+      this.webApp.requestWriteAccess((isAccessGranted: boolean) => {
+        subscriber.next(isAccessGranted);
+        subscriber.complete();
+      });
     });
-
-    return subject$.asObservable();
   }
 
   /**
@@ -330,14 +303,12 @@ Function that shows a native popup requesting permission for the bot to send mes
    * Function that shows a native popup prompting the user for their phone number.
    */
   requestContact() {
-    const subject$ = new Subject<boolean>();
-
-    this.webApp.requestContact((val: boolean) => {
-      subject$.next(val);
-      subject$.complete();
-    });
-
-    return subject$.asObservable();
+    return new Observable<boolean>(subscriber => {
+      this.webApp.requestContact((isContactShared: boolean) => {
+        subscriber.next(isContactShared);
+        subscriber.complete();
+      });
+    })
   }
 
   /**
@@ -345,8 +316,8 @@ Function that shows a native popup requesting permission for the bot to send mes
    */
   readTextFromClipboard() {
     return new Observable<string | null>((subscriber) => {
-      this.webApp.readTextFromClipboard((val: string | null) => {
-        subscriber.next(val);
+      this.webApp.readTextFromClipboard((clipboardText: string | null) => {
+        subscriber.next(clipboardText);
         subscriber.complete();
       });
     });
