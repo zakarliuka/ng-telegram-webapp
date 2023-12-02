@@ -6,6 +6,10 @@ export const TWA = new InjectionToken<TelegramWebApp.WebApp>(
   {
     providedIn: 'root',
     factory: () => {
+      if(!Telegram || !Telegram.WebApp){
+        throw new Error('Telegram context not found. Initialize mini app first: https://core.telegram.org/bots/webapps#initializing-mini-apps');
+      }
+
       return Telegram.WebApp;
     },
   }

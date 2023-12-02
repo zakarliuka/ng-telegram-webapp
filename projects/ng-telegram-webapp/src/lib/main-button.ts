@@ -2,6 +2,7 @@ import { TelegramWebApp } from '@zakarliuka/tg-webapp-types';
 import { TwaButton } from './button';
 
 export class MainButton extends TwaButton<TelegramWebApp.MainButton> {
+
   /**
    * Current button text
    */
@@ -44,7 +45,8 @@ export class MainButton extends TwaButton<TelegramWebApp.MainButton> {
     return this.button.isProgressVisible;
   }
 
-  /** A method to set the button text.
+  /**
+   * A method to set the button text.
    */
   setText(text: string) {
     this.button.setText(text);
@@ -77,7 +79,6 @@ export class MainButton extends TwaButton<TelegramWebApp.MainButton> {
   }
 
   /**
-   *
    * Shows whether the button is active. Set to true by default.
    */
   hideProgress() {
@@ -85,21 +86,16 @@ export class MainButton extends TwaButton<TelegramWebApp.MainButton> {
     return this;
   }
 
-  /** A method to set the button parameters. The params parameter is an object containing one or several fields that need to be changed:
+  /**
+   * A method to set the button parameters. The params parameter is an object containing one or several fields that need to be changed:
    * - text - button text;
    * - color - button color;
    * - text_color - button text color;
    * - is_active - enable the button;
    * - is_visible - show the button.
    */
-  setParams(params: {
-    text: string;
-    color: string;
-    text_color: string;
-    is_active: boolean;
-    is_visible: boolean;
-  }) {
-    this.setParams(params);
+  setParams(params: Parameters<TelegramWebApp.MainButton['setParams']>[0]) {
+    this.button.setParams(params);
     return this;
   }
 }

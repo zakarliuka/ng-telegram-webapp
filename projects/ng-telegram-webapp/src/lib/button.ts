@@ -1,43 +1,34 @@
 import { TelegramWebApp } from '@zakarliuka/tg-webapp-types';
-import { EMPTY, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 export abstract class TwaButton<
   T extends TelegramWebApp.MainButton | TelegramWebApp.BackButton
 > {
-  #clickSubject: Subject<void> | null = null;
 
-  constructor(protected readonly button: T) {}
+  public readonly clicks$: Observable<void>;
 
-  private handleOnClick = () => {
-    this.#clickSubject?.next();
-  };
+  constructor(protected readonly button: T) {
+    this.clicks$ = new Observable<void>(subscriber => {
+      const clickHandler = subscriber.next.bind(subscriber);
+      button.onClick(clickHandler);
+
+      return () => {
+        button.offClick(clickHandler);
+      };
+    });
+  }
 
   /**
    *  A method to make the button active and visible.
    */
   show() {
-    if (!this.button) {
-      return EMPTY;
-    }
-
-    if (this.#clickSubject) {
-      this.#clickSubject.complete();
-    }
-
-    this.#clickSubject = new Subject();
-
-    this.button.show().onClick(this.handleOnClick);
-    return this.#clickSubject.asObservable();
+    this.button.show();
   }
 
   /**
    *  A method to hide the button.
    */
   hide() {
-    this.button?.offClick(this.handleOnClick);
-    this.button?.hide();
-
-    this.#clickSubject?.complete();
-    this.#clickSubject = null;
+    this.button.hide();
   }
 }
